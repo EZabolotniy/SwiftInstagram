@@ -16,7 +16,7 @@ public class Instagram {
 
     public typealias EmptySuccessHandler = () -> Void
     public typealias SuccessHandler<T> = (_ data: T) -> Void
-    public typealias FailureHandler = (_ error: InstagramError) -> Void
+    public typealias FailureHandler = (_ error: InstagramError?) -> Void
 
     typealias Parameters = [String: Any]
 
