@@ -51,6 +51,17 @@ public class InstagramLoginViewController: UIViewController {
             navigationItem.largeTitleDisplayMode = .never
         }
         
+        // Initializes progress view
+        setupProgressView()
+
+        // Initializes web view
+        webView = setupWebView()
+
+        // Starts authorization
+        webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(close(_:)))
+        
         let toolbar = UIToolbar()
         toolbar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(toolbar)
@@ -76,17 +87,6 @@ public class InstagramLoginViewController: UIViewController {
         
         toolbar.tintColor = .black
         toolbar.items = [back, fix1, forward, flex, reload]
-        
-        // Initializes progress view
-        setupProgressView()
-
-        // Initializes web view
-        webView = setupWebView()
-
-        // Starts authorization
-        webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(close(_:)))
     }
 
     deinit {
