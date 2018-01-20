@@ -75,15 +75,23 @@ public class InstagramLoginViewController: UIViewController {
             toolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         }
         
-        let back = UIBarButtonItem(image: UIImage(named: "browser_back"), style: .plain, target: nil, action: #selector(browserBack(_:)))
+        let bndl = Bundle(for: type(of: self))
+        
+        let back = UIBarButtonItem(
+            image: UIImage(named: "browser_back", in: bndl, compatibleWith: nil),
+            style: .plain, target: nil, action: #selector(browserBack(_:)))
         
         let fix1 = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
         fix1.width = 24
         
-        let forward = UIBarButtonItem(image: UIImage(named: "browser_forward"), style: .plain, target: nil, action: #selector(browserForward(_:)))
+        let forward = UIBarButtonItem(
+            image: UIImage(named: "browser_forward", in: bndl, compatibleWith: nil), style: .plain, target: nil,
+            action: #selector(browserForward(_:)))
         
         let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let reload = UIBarButtonItem(image: UIImage(named: "browser_reload"), style: .plain, target: nil, action: #selector(browserReload(_:)))
+        let reload = UIBarButtonItem(
+            image: UIImage(named: "browser_reload", in: bndl, compatibleWith: nil), style: .plain, target: nil,
+            action: #selector(browserReload(_:)))
         
         toolbar.tintColor = .black
         toolbar.items = [back, fix1, forward, flex, reload]

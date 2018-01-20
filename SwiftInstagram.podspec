@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
  s.documentation_url    = 'https://andergoig.github.io/SwiftInstagram/'
 
  s.platform             = :ios, '9.0'
-
+ s.resources = "*.xcassets"
  s.default_subspec      = 'Core'
  s.subspec 'Core' do |ss|
      ss.framework       = 'Foundation'
