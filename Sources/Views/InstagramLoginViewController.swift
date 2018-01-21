@@ -186,6 +186,10 @@ extension InstagramLoginViewController: WKNavigationDelegate {
         fwdItem.isEnabled = webView.canGoForward
     }
     
+    func updateScrollViewOffset() {
+        webView.scrollView.setContentOffset(CGPoint(x: 0, y: -webView.scrollView.contentInset.top), animated: false)
+    }
+    
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         navigationItem.title = webView.title
     }
@@ -212,8 +216,8 @@ extension InstagramLoginViewController: WKNavigationDelegate {
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void)
     {
         guard let httpResponse = navigationResponse.response as? HTTPURLResponse else {
+            updateScrollViewOffset()
             updateNavigationButtons()
-            webView.scrollView.setContentOffset(.zero, animated: false)
             decisionHandler(.allow)
             return
         }
@@ -225,7 +229,7 @@ extension InstagramLoginViewController: WKNavigationDelegate {
                 self.failure?(InstagramError(kind: .invalidRequest, message: "Invalid request"))
             }
         default:
-            webView.scrollView.setContentOffset(.zero, animated: false)
+            updateScrollViewOffset
             updateNavigationButtons()
             decisionHandler(.allow)
         }
