@@ -229,7 +229,7 @@ extension InstagramLoginViewController: WKNavigationDelegate {
                 self.failure?(InstagramError(kind: .invalidRequest, message: "Invalid request"))
             }
         default:
-            updateScrollViewOffset
+            updateScrollViewOffset()
             updateNavigationButtons()
             decisionHandler(.allow)
         }
