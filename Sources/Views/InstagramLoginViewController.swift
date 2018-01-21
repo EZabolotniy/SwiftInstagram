@@ -29,6 +29,9 @@ public class InstagramLoginViewController: UIViewController {
     private weak var webView: WKWebView!
     
     // MARK: - Initializers
+    
+    private var backItem: UIBarButtonItem!
+    private var fwdItem: UIBarButtonItem!
 
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -95,6 +98,10 @@ public class InstagramLoginViewController: UIViewController {
         
         toolbar.tintColor = .black
         toolbar.items = [back, fix1, forward, flex, reload]
+        
+        backItem = back
+        fwdItem = forward
+        updateNavigationButtons()
     }
 
     deinit {
@@ -174,6 +181,11 @@ public class InstagramLoginViewController: UIViewController {
 
 extension InstagramLoginViewController: WKNavigationDelegate {
 
+    func updateNavigationButtons() {
+        backItem.isEnabled = webView.canGoBack
+        fwdItem.isEnabled = webView.canGoForward
+    }
+    
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         navigationItem.title = webView.title
     }
@@ -200,6 +212,8 @@ extension InstagramLoginViewController: WKNavigationDelegate {
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void)
     {
         guard let httpResponse = navigationResponse.response as? HTTPURLResponse else {
+            updateNavigationButtons()
+            webView.scrollView.setContentOffset(.zero, animated: false)
             decisionHandler(.allow)
             return
         }
@@ -211,6 +225,8 @@ extension InstagramLoginViewController: WKNavigationDelegate {
                 self.failure?(InstagramError(kind: .invalidRequest, message: "Invalid request"))
             }
         default:
+            webView.scrollView.setContentOffset(.zero, animated: false)
+            updateNavigationButtons()
             decisionHandler(.allow)
         }
     }
