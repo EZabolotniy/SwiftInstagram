@@ -7,39 +7,20 @@
 //
 
 /// A type representing an error value that can be thrown.
+public enum InstagramError: Error {
 
-public struct InstagramError: Error {
+    /// Error 400 on login
+    case badRequest
 
-    // MARK: - Properties
+    /// Error decoding JSON
+    case decoding(message: String)
 
-    let kind: ErrorKind
-    let message: String
+    /// Invalid API request
+    case invalidRequest(message: String)
 
-    /// Retrieve the localized description for this error.
-    public var localizedDescription: String {
-        return "[\(kind.description)] - \(message)"
-    }
+    /// Keychain error
+    case keychainError(code: OSStatus)
 
-    // MARK: - Types
-
-    enum ErrorKind: CustomStringConvertible {
-        case invalidRequest
-        case jsonParseError
-        case keychainError(code: OSStatus)
-        case missingClient
-
-        var description: String {
-            switch self {
-            case .invalidRequest:
-                return "invalidRequest"
-            case .jsonParseError:
-                return "jsonParseError"
-            case .keychainError(let code):
-                return "keychainError(code: \(code)"
-            case .missingClient:
-                return "missingClient"
-            }
-        }
-    }
-
+    /// The client id or the redirect URI is missing inside the Info.plist file
+    case missingClientIdOrRedirectURI
 }

@@ -37,5 +37,7 @@ struct InstagramResponse<T: Decodable>: Decodable {
             case nextMaxId = "next_max_id"
         }
     }
-
 }
+
+/// Dummy struct used for empty Instagram API data responses
+public struct InstagramEmptyResponse: Decodable { }

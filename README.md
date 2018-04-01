@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://andergoig.github.io/SwiftInstagram">
-        <img src="https://rawgit.com/AnderGoig/SwiftInstagram/master/.assets/SwiftInstagram-Logo.png" alt="SwiftInstagram Logo" width="700" height="200">
+        <img src="https://rawgit.com/AnderGoig/SwiftInstagram/master/.assets/SwiftInstagram-Logo.png" alt="SwiftInstagram Logo" width="800" height="248">
     </a>
 </p>
 
@@ -57,6 +57,7 @@
 - [x] Secure access token storing, thanks to [keychain-swift](https://github.com/evgenyneu/keychain-swift).
 - [x] Client-Side authentication.
 - [x] 100% documented code.
+- [x] Use of Swift 4 Decodable.
 - [x] Up-to-date with the latest Apple technologies (Swift 4, Xcode 9, etc).
 
 ### [Upcoming features](https://github.com/AnderGoig/SwiftInstagram/projects/1)

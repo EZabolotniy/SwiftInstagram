@@ -9,12 +9,12 @@
 import UIKit
 import WebKit
 
-public class InstagramLoginViewController: UIViewController {
+class InstagramLoginViewController: UIViewController {
 
     // MARK: - Types
 
     typealias SuccessHandler = (_ accesToken: String) -> Void
-    typealias FailureHandler = (_ error: InstagramError?) -> Void
+    typealias FailureHandler = (_ error: InstagramError) -> Void
 
     // MARK: - Properties
 
@@ -25,15 +25,9 @@ public class InstagramLoginViewController: UIViewController {
     private var progressView: UIProgressView!
     private var webViewObservation: NSKeyValueObservation!
 
-    private weak var toolbar: UIToolbar!
-    private weak var webView: WKWebView!
-    
     // MARK: - Initializers
-    
-    private var backItem: UIBarButtonItem!
-    private var fwdItem: UIBarButtonItem!
 
-    required public init?(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -47,61 +41,21 @@ public class InstagramLoginViewController: UIViewController {
 
     // MARK: - View Lifecycle
 
-    override public func viewDidLoad() {
+    override func viewDidLoad() {
         super.viewDidLoad()
 
         if #available(iOS 11.0, *) {
             navigationItem.largeTitleDisplayMode = .never
         }
-        
+
         // Initializes progress view
         setupProgressView()
 
         // Initializes web view
-        webView = setupWebView()
+        let webView = setupWebView()
 
         // Starts authorization
         webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(close(_:)))
-        
-        let toolbar = UIToolbar()
-        toolbar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(toolbar)
-        
-        toolbar.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        toolbar.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        
-        if #available(iOS 11.0, *) {
-            toolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        } else {
-            toolbar.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        }
-        
-        let bndl = Bundle(for: type(of: self))
-        
-        let back = UIBarButtonItem(
-            image: UIImage(named: "browser_back", in: bndl, compatibleWith: nil),
-            style: .plain, target: nil, action: #selector(browserBack(_:)))
-        
-        let fix1 = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
-        fix1.width = 24
-        
-        let forward = UIBarButtonItem(
-            image: UIImage(named: "browser_forward", in: bndl, compatibleWith: nil), style: .plain, target: nil,
-            action: #selector(browserForward(_:)))
-        
-        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        let reload = UIBarButtonItem(
-            image: UIImage(named: "browser_reload", in: bndl, compatibleWith: nil), style: .plain, target: nil,
-            action: #selector(browserReload(_:)))
-        
-        toolbar.tintColor = .black
-        toolbar.items = [back, fix1, forward, flex, reload]
-        
-        backItem = back
-        fwdItem = forward
-        updateNavigationButtons()
     }
 
     deinit {
@@ -116,7 +70,7 @@ public class InstagramLoginViewController: UIViewController {
 
         progressView = UIProgressView(progressViewStyle: .bar)
         progressView.progress = 0.0
-        progressView.tintColor = UIColor(red: 103/255.0, green: 79/255.0, blue: 241/255.0, alpha: 1.0)
+        progressView.tintColor = UIColor(red: 0.88, green: 0.19, blue: 0.42, alpha: 1.0)
         progressView.translatesAutoresizingMaskIntoConstraints = false
 
         navBar.addSubview(progressView)
@@ -156,47 +110,20 @@ public class InstagramLoginViewController: UIViewController {
         }
     }
 
-    @objc private func browserBack(_ sender: UIBarButtonItem) {
-        if webView.canGoBack {
-            webView.goBack()
-        }
-    }
-    
-    @objc private func browserForward(_ sender: UIBarButtonItem) {
-        if webView.canGoForward {
-            webView.goForward()
-        }
-    }
-    
-    @objc private func browserReload(_ sender: UIBarButtonItem) {
-        webView.reload()
-    }
-    
-    @objc private func close(_ sender: UIBarButtonItem) {
-        failure?(nil)
-    }
 }
 
 // MARK: - WKNavigationDelegate
 
 extension InstagramLoginViewController: WKNavigationDelegate {
 
-    func updateNavigationButtons() {
-        backItem.isEnabled = webView.canGoBack
-        fwdItem.isEnabled = webView.canGoForward
-    }
-    
-    func updateScrollViewOffset() {
-//        webView.scrollView.setContentOffset(CGPoint(x: 0, y: -webView.scrollView.contentInset.top), animated: false)
-    }
-    
-    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         navigationItem.title = webView.title
     }
 
-    public func webView(_ webView: WKWebView,
+    func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+
         let urlString = navigationAction.request.url!.absoluteString
 
         guard let range = urlString.range(of: "#access_token=") else {
@@ -211,13 +138,11 @@ extension InstagramLoginViewController: WKNavigationDelegate {
         }
     }
 
-    public func webView(_ webView: WKWebView,
+    func webView(_ webView: WKWebView,
                  decidePolicyFor navigationResponse: WKNavigationResponse,
-                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void)
-    {
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+
         guard let httpResponse = navigationResponse.response as? HTTPURLResponse else {
-            updateScrollViewOffset()
-            updateNavigationButtons()
             decisionHandler(.allow)
             return
         }
@@ -226,13 +151,10 @@ extension InstagramLoginViewController: WKNavigationDelegate {
         case 400:
             decisionHandler(.cancel)
             DispatchQueue.main.async {
-                self.failure?(InstagramError(kind: .invalidRequest, message: "Invalid request"))
+                self.failure?(InstagramError.badRequest)
             }
         default:
-            updateScrollViewOffset()
-            updateNavigationButtons()
             decisionHandler(.allow)
         }
     }
-
 }
