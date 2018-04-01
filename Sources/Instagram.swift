@@ -15,7 +15,7 @@ public class Instagram {
 
     public typealias EmptySuccessHandler = () -> Void
     public typealias SuccessHandler<T> = (_ data: T) -> Void
-    public typealias FailureHandler = (_ error: Error) -> Void
+    public typealias FailureHandler = (_ error: Error?) -> Void
 
     private enum API {
         static let authURL = "https://api.instagram.com/oauth/authorize"
