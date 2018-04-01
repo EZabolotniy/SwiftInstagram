@@ -188,7 +188,7 @@ extension InstagramLoginViewController: WKNavigationDelegate {
     }
     
     func updateScrollViewOffset() {
-        webView.scrollView.setContentOffset(CGPoint(x: 0, y: -webView.scrollView.contentInset.top), animated: false)
+        //        webView.scrollView.setContentOffset(CGPoint(x: 0, y: -webView.scrollView.contentInset.top), animated: false)
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
