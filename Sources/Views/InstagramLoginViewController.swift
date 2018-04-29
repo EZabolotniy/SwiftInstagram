@@ -10,21 +10,21 @@ import UIKit
 import WebKit
 
 public class InstagramLoginViewController: UIViewController {
-
+    
     // MARK: - Types
-
+    
     typealias SuccessHandler = (_ accesToken: String) -> Void
     typealias FailureHandler = (_ error: InstagramError?) -> Void
-
+    
     // MARK: - Properties
-
+    
     private var authURL: URL
     private var success: SuccessHandler?
     private var failure: FailureHandler?
-
+    
     private var progressView: UIProgressView!
     private var webViewObservation: NSKeyValueObservation!
-
+    
     private weak var toolbar: UIToolbar!
     private weak var webView: WKWebView!
     
@@ -32,34 +32,34 @@ public class InstagramLoginViewController: UIViewController {
     private var fwdItem: UIBarButtonItem!
     
     // MARK: - Initializers
-
+    
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     init(authURL: URL, success: SuccessHandler?, failure: FailureHandler?) {
         self.authURL = authURL
         self.success = success
         self.failure = failure
-
+        
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     // MARK: - View Lifecycle
-
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
-
+        
         if #available(iOS 11.0, *) {
             navigationItem.largeTitleDisplayMode = .never
         }
-
+        
         // Initializes progress view
         setupProgressView()
-
+        
         // Initializes web view
         webView = setupWebView()
-
+        
         // Starts authorization
         webView.load(URLRequest(url: authURL, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
         
@@ -103,50 +103,50 @@ public class InstagramLoginViewController: UIViewController {
         fwdItem = forward
         updateNavigationButtons()
     }
-
+    
     deinit {
         progressView.removeFromSuperview()
         webViewObservation.invalidate()
     }
-
+    
     // MARK: -
-
+    
     private func setupProgressView() {
         let navBar = navigationController!.navigationBar
-
+        
         progressView = UIProgressView(progressViewStyle: .bar)
         progressView.progress = 0.0
         progressView.tintColor = UIColor(red: 103/255.0, green: 79/255.0, blue: 241/255.0, alpha: 1.0)
         progressView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         navBar.addSubview(progressView)
-
+        
         let bottomConstraint = navBar.bottomAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 1)
         let leftConstraint = navBar.leadingAnchor.constraint(equalTo: progressView.leadingAnchor)
         let rightConstraint = navBar.trailingAnchor.constraint(equalTo: progressView.trailingAnchor)
-
+        
         NSLayoutConstraint.activate([bottomConstraint, leftConstraint, rightConstraint])
     }
-
+    
     private func setupWebView() -> WKWebView {
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.websiteDataStore = .nonPersistent()
-
+        
         let webView = WKWebView(frame: view.frame, configuration: webConfiguration)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
-
+        
         webViewObservation = webView.observe(\.estimatedProgress, changeHandler: progressViewChangeHandler)
-
+        
         view.addSubview(webView)
-
+        
         return webView
     }
-
+    
     private func progressViewChangeHandler<Value>(webView: WKWebView, change: NSKeyValueObservedChange<Value>) {
         progressView.alpha = 1.0
         progressView.setProgress(Float(webView.estimatedProgress), animated: true)
-
+        
         if webView.estimatedProgress >= 1.0 {
             UIView.animate(withDuration: 0.3, delay: 0.1, options: .curveEaseInOut, animations: {
                 self.progressView.alpha = 0.0
@@ -175,55 +175,64 @@ public class InstagramLoginViewController: UIViewController {
     @objc private func close(_ sender: UIBarButtonItem) {
         failure?(nil)
     }
-
+    
 }
 
 // MARK: - WKNavigationDelegate
 
 extension InstagramLoginViewController: WKNavigationDelegate {
-
+    
     func updateNavigationButtons() {
         backItem.isEnabled = webView.canGoBack
         fwdItem.isEnabled = webView.canGoForward
     }
     
     func updateScrollViewOffset() {
-        //        webView.scrollView.setContentOffset(CGPoint(x: 0, y: -webView.scrollView.contentInset.top), animated: false)
+        let topOffset: CGFloat
+        
+        if #available(iOS 11.0, *) {
+            topOffset = view.safeAreaInsets.top
+        } else {
+            topOffset = topLayoutGuide.length
+        }
+        
+        webView.scrollView.contentInset = UIEdgeInsetsMake(topOffset, webView.scrollView.contentInset.left, webView.scrollView.contentInset.right, webView.scrollView.contentInset.bottom)
+        webView.scrollView.setContentOffset(CGPoint(x: 0, y: -topOffset), animated: false)
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         navigationItem.title = webView.title
     }
-
+    
     public func webView(_ webView: WKWebView,
-                 decidePolicyFor navigationAction: WKNavigationAction,
-                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-
+                        decidePolicyFor navigationAction: WKNavigationAction,
+                        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        
         let urlString = navigationAction.request.url!.absoluteString
-
+        
         guard let range = urlString.range(of: "#access_token=") else {
             decisionHandler(.allow)
             return
         }
-
+        
         decisionHandler(.cancel)
-
+        
         DispatchQueue.main.async {
             self.success?(String(urlString[range.upperBound...]))
         }
     }
-
+    
     public func webView(_ webView: WKWebView,
-                 decidePolicyFor navigationResponse: WKNavigationResponse,
-                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-
+                        decidePolicyFor navigationResponse: WKNavigationResponse,
+                        decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        
         guard let httpResponse = navigationResponse.response as? HTTPURLResponse else {
             updateScrollViewOffset()
             updateNavigationButtons()
             decisionHandler(.allow)
             return
         }
-
+        
         switch httpResponse.statusCode {
         case 400:
             decisionHandler(.cancel)
